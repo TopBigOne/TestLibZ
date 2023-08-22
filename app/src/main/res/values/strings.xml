@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TestLibZ</string>
+
+
+    <string name="https_get">https get</string>
+    <string name="https_post">https post</string>
+    <string name="network_resp">network resp</string>
 </resources>
