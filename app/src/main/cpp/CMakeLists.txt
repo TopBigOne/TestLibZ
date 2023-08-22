@@ -5,12 +5,15 @@ project("testlibz")
 
 add_library(testlibz
         SHARED
-        native-lib.cpp)
+        native-lib.cpp
+        web_task.cpp
+        JniUtils.cpp
+        )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/include/openssl
-        ${CMAKE_SOURCE_DIR}/include/curl
-        ${CMAKE_SOURCE_DIR}/include/zlib
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/curl
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/zlib
 )
 
 #
