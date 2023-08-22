@@ -36,7 +36,6 @@ add_library(libz STATIC IMPORTED)
 set_target_properties(libz PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libz.a)
 
 
-
 target_link_libraries(
         ${CMAKE_PROJECT_NAME}
         libcrypto
