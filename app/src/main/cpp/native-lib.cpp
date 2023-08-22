@@ -19,10 +19,10 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz) {
     //GET请求
-    string url = "http://www.weather.com.cn/data/sk/101280601.html";
+    string url = "http://jsonplaceholder.typicode.com/posts";
     WebTask task;
     task.SetUrl(url.c_str());
-    task.SetConnectTimeout(5);
+    task.SetConnectTimeout(10);
     task.DoGetString();
     if (task.WaitTaskDone() == 0) {
         //请求服务器成功
@@ -31,7 +31,7 @@ Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz) {
 
         return env->NewStringUTF(jsonResult.c_str());
     }
-    LOGI("网络连接失败\n");
+    LOGE("httpGet ： 网络连接失败\n");
     return env->NewStringUTF("网络连接失败！");
 
 }
