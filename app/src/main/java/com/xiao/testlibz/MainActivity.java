@@ -10,7 +10,6 @@ import com.xiao.testlibz.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private ActivityMainBinding binding;
     private Button mBtnGet;
     private Button mBtnHttpsGet;
