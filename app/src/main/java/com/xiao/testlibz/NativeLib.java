@@ -10,9 +10,20 @@ public class NativeLib {
 
     private static native String httpPost();
 
+    private static native String httpsGet();
+
 
     public static String nativeHttpGet() {
         return httpGet();
+    }
+
+    /**
+     * https Get
+     *
+     * @return
+     */
+    public static String nativeHttpsGet() {
+        return httpsGet();
     }
 
     public static String nativeHttpPost() {

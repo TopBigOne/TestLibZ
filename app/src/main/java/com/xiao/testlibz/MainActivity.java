@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private Button mBtnGet;
+    private Button mBtnHttpsGet;
     private Button mBtnPost;
     private TextView mTvResp;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         mTvResp = binding.tvRespContent;
         mBtnGet = binding.btnRequestGet;
         mBtnPost = binding.btnRequestPost;
+        mBtnHttpsGet = binding.btnRequestHttpsGet;
     }
 
     private void initEvent() {
@@ -39,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
         });
         mBtnPost.setOnClickListener(v -> {
             updateContent(NativeLib.nativeHttpPost());
+        });
+
+        mBtnHttpsGet.setOnClickListener(v -> {
+            updateContent(NativeLib.nativeHttpsGet());
         });
     }
 
