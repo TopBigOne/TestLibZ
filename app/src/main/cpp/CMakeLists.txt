@@ -16,6 +16,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl
         ${CMAKE_CURRENT_SOURCE_DIR}/include/curl
         ${CMAKE_CURRENT_SOURCE_DIR}/include/zlib
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/jsoncpp
 )
 
 
@@ -28,14 +29,18 @@ set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOU
 add_library(libcurl SHARED IMPORTED)
 set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libcurl.so)
 
+# libjsoncpp
+add_library(libjsoncpp SHARED IMPORTED)
+set_target_properties(libjsoncpp PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libjsoncpp.so)
+
 # openssl
 add_library(libssl SHARED IMPORTED)
 set_target_properties(libssl PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libssl.so)
 
 
 # libz
-add_library(libz SHARED IMPORTED)
-set_target_properties(libz PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libz.so)
+add_library(libz STATIC IMPORTED)
+set_target_properties(libz PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libz.a)
 
 
 target_link_libraries(
@@ -44,5 +49,6 @@ target_link_libraries(
         libz
         libssl
         libcurl
+        libjsoncpp
         android
         log)

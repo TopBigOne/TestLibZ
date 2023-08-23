@@ -31,7 +31,7 @@ android {
         }
     }
     // 这个分支编译so用到的ndk版本
-    ndkVersion='23.2.8568313'
+    ndkVersion='25.2.9519653'
 
     buildTypes {
         release {
