@@ -13,12 +13,13 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private Button mBtnHttpsGet;
+    private Button mBtnHttpsGetTwo;
     private Button mBtnPost;
     private TextView mTvResp;
 
 
     private static final String TAG = "MainActivity_ : ";
-    //public static final String HTTP_GET_URL = "http://jsonplaceholder.typicode.com/posts";
+    public static final String HTTP_GET_URL = "http://jsonplaceholder.typicode.com/posts";
     public static final String HTTPS_GET_URL = "https://api.thecatapi.com/v1/images/search?limit=1";
 
     private NativeTaskImpl nativeTask;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         mTvResp = binding.tvRespContent;
         mBtnPost = binding.btnRequestPost;
         mBtnHttpsGet = binding.btnRequestHttpsGet;
+        mBtnHttpsGetTwo = binding.btnRequestHttpsGetTwo;
     }
 
     private void initEvent() {
@@ -51,17 +53,20 @@ public class MainActivity extends AppCompatActivity {
             nativeTask.startTask(HTTPS_GET_URL);
 
         });
+        mBtnHttpsGetTwo.setOnClickListener(v -> {
+            updateContent(NativeLib.httpGet(HTTP_GET_URL));
+        });
 
         nativeTask.setNativeRequestListener(new NativeRequestListener() {
             @Override
             public void onSuccess(String msg) {
-                Log.d(TAG, "nativeTask onSuccess: msg   :"+msg);
+                Log.d(TAG, "nativeTask onSuccess: msg   :" + msg);
                 updateContent(msg);
             }
 
             @Override
             public void onFailure(int code, String errMsg) {
-                Log.d(TAG, "nativeTask onSuccess: errMsg :"+errMsg);
+                Log.d(TAG, "nativeTask onSuccess: errMsg :" + errMsg);
                 updateContent(errMsg);
             }
         });

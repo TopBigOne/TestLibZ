@@ -11,8 +11,9 @@ public class NativeLib {
     private static native int httpPost(long ptr);
 
     private static native int httpsGet(long ptr);
-
     private static native long cancelHttpRequest(long ptr);
+
+    public static native String httpGet(String url);
 
     /**
      * https Get

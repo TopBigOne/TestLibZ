@@ -8,7 +8,6 @@
 using namespace std;
 
 
-#define JAVA_NATIVE_REQUEST_LISTENER "com/xiao/testlibz/NativeTaskImpl$NativeRequestListener"
 #define JAVA_NATIVE_TASK_IMPL_PATH    "com/xiao/testlibz/NativeTaskImpl"
 
 void startNotifyApp(JNIEnv *pEnv, const string &basicString);
@@ -129,4 +128,24 @@ Java_com_xiao_testlibz_NativeLib_cancelHttpRequest(JNIEnv *env, jclass clazz, jl
     // todo  需要 查看正常条件下 cancelRequest 的CURLcode是多少。
     task->cancelRequest();
     return 0;
+}
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jstring url) {
+    //GET请求
+    const char *tempUrl = env->GetStringUTFChars(url,JNI_FALSE);
+    WebTask task;
+    task.SetUrl(tempUrl);
+    task.SetConnectTimeout(10);
+    task.DoGetString();
+    if (task.WaitTaskDone() == 0) {
+        //请求服务器成功
+        string jsonResult = task.GetResultString();
+        LOGI("httpGet ：%s\n", jsonResult.c_str());
+        startParseHttpGetResp(jsonResult);
+        return env->NewStringUTF(jsonResult.c_str());
+    }
+    LOGE("httpGet ： 网络连接失败\n");
+    return env->NewStringUTF("网络连接失败！");
+
 }
