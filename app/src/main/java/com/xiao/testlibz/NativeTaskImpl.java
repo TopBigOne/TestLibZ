@@ -5,11 +5,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class NativeTaskImpl extends NativeTask {
-
     private NativeRequestListener nativeRequestListener;
-
-
-
 
     public void setNativeRequestListener(NativeRequestListener nativeRequestListener) {
         this.nativeRequestListener = nativeRequestListener;
@@ -20,8 +16,8 @@ public class NativeTaskImpl extends NativeTask {
      * @param msg  成功和失败公用，json or error msg.
      */
     public void nativeNotify(int code, String msg) {
-
-        Log.i(TAG, "nativeNotify: msg : "+msg);
+        Log.i(TAG, "nativeNotify: msg : " + msg);
+        Toast.makeText(NetworkApp.getInstance(), msg, Toast.LENGTH_SHORT).show();
 
       /*  if (nativeRequestListener == null) {
             return;

@@ -13,6 +13,26 @@ using namespace std;
 
 void startNotifyApp(JNIEnv *pEnv, const string &basicString);
 
+/**
+ * 通知
+ * @param pEnv
+ * @param code
+ * @param basicString
+ */
+void startNotifyApp(JNIEnv *pEnv, int code, const string &basicString) {
+    LOGI("startNotifyApp : ");
+
+    jclass nativeTaskClass = pEnv->FindClass(JAVA_NATIVE_TASK_IMPL_PATH);
+    jobject nativeTaskObject = pEnv->AllocObject(nativeTaskClass);
+
+
+    jmethodID notifyMethodId = pEnv->GetMethodID(nativeTaskClass, "nativeNotify",
+                                                 "(ILjava/lang/String;)V");
+    pEnv->CallVoidMethod(nativeTaskObject, notifyMethodId, code,
+                         pEnv->NewStringUTF(basicString.c_str()));
+}
+
+
 void startParseHttpGetResp(string &respStr) {
     Json::Reader reader;
     Json::Value root;
@@ -71,70 +91,30 @@ Java_com_xiao_testlibz_NativeLib_initHttp(JNIEnv *env, jclass clazz, jstring url
     return tempLong;
 }
 
-/**
- * 通知
- * @param pEnv
- * @param code
- * @param basicString
- */
-void startNotifyApp(JNIEnv *pEnv, int code, const string &basicString) {
-    LOGI("startNotifyApp : ");
 
-    jclass nativeTaskClass = pEnv->FindClass(JAVA_NATIVE_TASK_IMPL_PATH);
-    jobject nativeTaskObject = pEnv->AllocObject(nativeTaskClass);
-
-
-    jmethodID notifyMethodId = pEnv->GetMethodID(nativeTaskClass, "nativeNotify",
-                                                 "(ILjava/lang/String;)V");
-    pEnv->CallVoidMethod(nativeTaskObject, notifyMethodId, code,
-                         pEnv->NewStringUTF(basicString.c_str()));
-}
-
-/**
- * 给Java层返回一个指针
- */
-extern "C"
-JNIEXPORT jint JNICALL
-Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
-    auto *task = reinterpret_cast<WebTask *>(webTaskPtr);
-    task->DoGetString();
-
-    if (task->WaitTaskDone() == 0) {
-        //请求服务器成功
-        string jsonResult = task->GetResultString();
-        LOGI("httpGet ：%s\n", jsonResult.c_str());
-        startNotifyApp(env, CURLIOE_OK, jsonResult);
-        startParseHttpGetResp(jsonResult);
-        // return env->NewStringUTF(jsonResult.c_str());
-        return CURLIOE_OK;
-    }
-    LOGE("httpGet ： 网络连接失败\n");
-    startNotifyApp(env, CURL_SOCKOPT_ERROR, "CURL_SOCKOPT_ERROR");
-
-    return CURL_SOCKOPT_ERROR;
-}
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_xiao_testlibz_NativeLib_httpPost(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
-    //return env->NewStringUTF("post 还没有实现.");
+    // todo...
+    startNotifyApp(env, CURL_SOCKOPT_ERROR, "post 还没有实现");;
     return -1;
 }
-
 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_xiao_testlibz_NativeLib_httpsGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
-
     auto *task = reinterpret_cast<WebTask *>(webTaskPtr);
     task->DoGetString();
     if (task->WaitTaskDone() == 0) {
         //请求服务器成功
         string jsonResult = task->GetResultString();
+        startNotifyApp(env, CURLE_OK,jsonResult);
         LOGI("httpsGet：%s\n", jsonResult.c_str());
         startParseHttpsGetResp(jsonResult);
         return CURLIOE_OK;
     }
     LOGE("httpsGet ： 网络连接失败\n");
+    startNotifyApp(env, CURL_SOCKOPT_ERROR, "网络连接失败");
     return CURL_SOCKOPT_ERROR;
 }
 

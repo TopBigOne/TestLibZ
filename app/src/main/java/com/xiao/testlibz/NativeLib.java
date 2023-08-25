@@ -8,18 +8,11 @@ public class NativeLib {
 
     private static native long initHttp(String url);
 
-    private static native int httpGet(long ptr);
-
     private static native int httpPost(long ptr);
 
     private static native int httpsGet(long ptr);
 
     private static native long cancelHttpRequest(long ptr);
-
-
-    public static int nativeHttpGet(long taskPtr) {
-        return httpGet(taskPtr);
-    }
 
     /**
      * https Get

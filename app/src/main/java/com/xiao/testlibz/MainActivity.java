@@ -12,14 +12,13 @@ import com.xiao.testlibz.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private Button mBtnGet;
     private Button mBtnHttpsGet;
     private Button mBtnPost;
     private TextView mTvResp;
 
 
     private static final String TAG = "MainActivity_ : ";
-    public static final String HTTP_GET_URL = "http://jsonplaceholder.typicode.com/posts";
+    //public static final String HTTP_GET_URL = "http://jsonplaceholder.typicode.com/posts";
     public static final String HTTPS_GET_URL = "https://api.thecatapi.com/v1/images/search?limit=1";
 
     private NativeTaskImpl nativeTask;
@@ -39,20 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         mTvResp = binding.tvRespContent;
-        mBtnGet = binding.btnRequestGet;
         mBtnPost = binding.btnRequestPost;
         mBtnHttpsGet = binding.btnRequestHttpsGet;
     }
 
     private void initEvent() {
-        mBtnGet.setOnClickListener(v -> {
-            Log.d(TAG, "initEvent: ");
-            nativeTask.startTask(HTTP_GET_URL);
-
-
-        });
         mBtnPost.setOnClickListener(v -> {
-
             //updateContent(NativeLib.nativeHttpPost());
         });
 

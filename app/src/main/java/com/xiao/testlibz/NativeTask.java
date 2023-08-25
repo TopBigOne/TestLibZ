@@ -51,7 +51,7 @@ public abstract class NativeTask {
         }
         Log.d(TAG, "realStartTask: ...");
         if (taskType == TaskType.GET) {
-            return NativeLib.nativeHttpGet(taskPtr);
+            return NativeLib.nativeHttpsGet(taskPtr);
         }
         return NativeLib.nativeHttpPost(taskPtr);
     }
