@@ -11,7 +11,10 @@ public class NativeLib {
     private static native int httpPost(long ptr);
 
     private static native int httpsGet(long ptr);
+
     private static native long cancelHttpRequest(long ptr);
+
+    private static native void releaseHttpRequest(long ptr);
 
     public static native String httpGet(String url);
 
@@ -34,6 +37,10 @@ public class NativeLib {
 
     public static long nativeInitHttp(String utl) {
         return initHttp(utl);
+    }
+
+    public static void nativeReleaseHttpRequest(long ptr) {
+        releaseHttpRequest(ptr);
     }
 
 

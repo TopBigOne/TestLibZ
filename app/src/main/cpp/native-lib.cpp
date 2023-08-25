@@ -23,8 +23,6 @@ void startNotifyApp(JNIEnv *pEnv, int code, const string &basicString) {
 
     jclass nativeTaskClass = pEnv->FindClass(JAVA_NATIVE_TASK_IMPL_PATH);
     jobject nativeTaskObject = pEnv->AllocObject(nativeTaskClass);
-
-
     jmethodID notifyMethodId = pEnv->GetMethodID(nativeTaskClass, "nativeNotify",
                                                  "(ILjava/lang/String;)V");
     pEnv->CallVoidMethod(nativeTaskObject, notifyMethodId, code,
@@ -85,7 +83,7 @@ Java_com_xiao_testlibz_NativeLib_initHttp(JNIEnv *env, jclass clazz, jstring url
     task->SetUrl(tempUrl);
     task->SetConnectTimeout(TIMEOUT_10);
     env->ReleaseStringUTFChars(url, tempUrl);
-    auto tempLong = reinterpret_cast<uint64_t>(task);
+    auto tempLong = reinterpret_cast<jlong>(task);
     LOGI("initHttp ： tempLong : %ld", tempLong);
     return tempLong;
 }
@@ -107,7 +105,7 @@ Java_com_xiao_testlibz_NativeLib_httpsGet(JNIEnv *env, jclass clazz, jlong webTa
     if (task->WaitTaskDone() == 0) {
         //请求服务器成功
         string jsonResult = task->GetResultString();
-        startNotifyApp(env, CURLE_OK,jsonResult);
+        startNotifyApp(env, CURLE_OK, jsonResult);
         LOGI("httpsGet：%s\n", jsonResult.c_str());
         startParseHttpsGetResp(jsonResult);
         return CURLIOE_OK;
@@ -127,13 +125,15 @@ Java_com_xiao_testlibz_NativeLib_cancelHttpRequest(JNIEnv *env, jclass clazz, jl
     }
     // todo  需要 查看正常条件下 cancelRequest 的CURLcode是多少。
     task->cancelRequest();
+    delete task;
+    task = nullptr;
     return 0;
 }
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jstring url) {
     //GET请求
-    const char *tempUrl = env->GetStringUTFChars(url,JNI_FALSE);
+    const char *tempUrl = env->GetStringUTFChars(url, JNI_FALSE);
     WebTask task;
     task.SetUrl(tempUrl);
     task.SetConnectTimeout(10);
@@ -148,4 +148,15 @@ Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jstring url)
     LOGE("httpGet ： 网络连接失败\n");
     return env->NewStringUTF("网络连接失败！");
 
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xiao_testlibz_NativeLib_releaseHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
+    auto *webTask = reinterpret_cast<WebTask *>(ptr);
+    if (webTask) {
+        delete webTask;
+        webTask = nullptr;
+    }
 }

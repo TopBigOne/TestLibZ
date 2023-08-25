@@ -27,6 +27,8 @@ public class NativeTaskImpl extends NativeTask {
             return;
         }
         nativeRequestListener.onFailure(code, msg);*/
+
+        ReleaseNativeTaskPtr();
     }
 
     /**

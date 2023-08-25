@@ -5,6 +5,7 @@ import android.util.Log;
 
 public abstract class NativeTask {
     public static final String TAG = "NativeTask : ";
+
     enum TaskType {
         GET, POST,
     }
@@ -47,7 +48,6 @@ public abstract class NativeTask {
         if (taskPtr <= 0) {
             Log.e(TAG, "realStartTask the taskPtr is less than 0.");
             return TaskStatus.NativePointerNULL;
-
         }
         Log.d(TAG, "realStartTask: ...");
         if (taskType == TaskType.GET) {
@@ -62,6 +62,12 @@ public abstract class NativeTask {
             return NativeLib.nativeCancelHttpRequest(taskPtr);
         }
         return TaskStatus.NativePointerNULL;
+    }
+
+    public void ReleaseNativeTaskPtr() {
+        if (taskPtr > 0) {
+            NativeLib.nativeReleaseHttpRequest(taskPtr);
+        }
     }
 
 
