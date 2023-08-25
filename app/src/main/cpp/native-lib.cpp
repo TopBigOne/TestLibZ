@@ -7,6 +7,12 @@
 
 using namespace std;
 
+
+#define JAVA_NATIVE_REQUEST_LISTENER "com/xiao/testlibz/NativeTaskImpl$NativeRequestListener"
+#define JAVA_NATIVE_TASK_IMPL_PATH    "com/xiao/testlibz/NativeTaskImpl"
+
+void startNotifyApp(JNIEnv *pEnv, const string &basicString);
+
 void startParseHttpGetResp(string &respStr) {
     Json::Reader reader;
     Json::Value root;
@@ -52,52 +58,95 @@ void startParseHttpsGetResp(string &respStr) {
 
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz) {
-    //GET请求
-    string url = "http://jsonplaceholder.typicode.com/posts";
-    WebTask task;
-    task.SetUrl(url.c_str());
-    task.SetConnectTimeout(10);
-    task.DoGetString();
-    if (task.WaitTaskDone() == 0) {
+JNIEXPORT jlong JNICALL
+Java_com_xiao_testlibz_NativeLib_initHttp(JNIEnv *env, jclass clazz, jstring url) {
+    auto task = new WebTask();
+    const char *tempUrl = env->GetStringUTFChars(url, JNI_FALSE);
+    LOGI("initHttp ： tempUrl : %s", tempUrl);
+    task->SetUrl(tempUrl);
+    task->SetConnectTimeout(TIMEOUT_10);
+    env->ReleaseStringUTFChars(url, tempUrl);
+    auto tempLong = reinterpret_cast<uint64_t>(task);
+    LOGI("initHttp ： tempLong : %ld", tempLong);
+    return tempLong;
+}
+
+/**
+ * 通知
+ * @param pEnv
+ * @param code
+ * @param basicString
+ */
+void startNotifyApp(JNIEnv *pEnv, int code, const string &basicString) {
+    LOGI("startNotifyApp : ");
+
+    jclass nativeTaskClass = pEnv->FindClass(JAVA_NATIVE_TASK_IMPL_PATH);
+    jobject nativeTaskObject = pEnv->AllocObject(nativeTaskClass);
+
+
+    jmethodID notifyMethodId = pEnv->GetMethodID(nativeTaskClass, "nativeNotify",
+                                                 "(ILjava/lang/String;)V");
+    pEnv->CallVoidMethod(nativeTaskObject, notifyMethodId, code,
+                         pEnv->NewStringUTF(basicString.c_str()));
+}
+
+/**
+ * 给Java层返回一个指针
+ */
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
+    auto *task = reinterpret_cast<WebTask *>(webTaskPtr);
+    task->DoGetString();
+
+    if (task->WaitTaskDone() == 0) {
         //请求服务器成功
-        string jsonResult = task.GetResultString();
+        string jsonResult = task->GetResultString();
         LOGI("httpGet ：%s\n", jsonResult.c_str());
+        startNotifyApp(env, CURLIOE_OK, jsonResult);
         startParseHttpGetResp(jsonResult);
-        return env->NewStringUTF(jsonResult.c_str());
+        // return env->NewStringUTF(jsonResult.c_str());
+        return CURLIOE_OK;
     }
     LOGE("httpGet ： 网络连接失败\n");
-    return env->NewStringUTF("网络连接失败！");
+    startNotifyApp(env, CURL_SOCKOPT_ERROR, "CURL_SOCKOPT_ERROR");
 
+    return CURL_SOCKOPT_ERROR;
 }
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_xiao_testlibz_NativeLib_httpPost(JNIEnv *env, jclass clazz) {
-
-    return env->NewStringUTF("post 还没有实现.");
+JNIEXPORT jint JNICALL
+Java_com_xiao_testlibz_NativeLib_httpPost(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
+    //return env->NewStringUTF("post 还没有实现.");
+    return -1;
 }
 
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_xiao_testlibz_NativeLib_httpsGet(JNIEnv *env, jclass clazz) {
-    //GET请求
-    string url = "https://api.thecatapi.com/v1/images/search?limit=1";
-    WebTask task;
-    task.SetUrl(url.c_str());
-    task.SetConnectTimeout(10);
-    task.DoGetString();
-    if (task.WaitTaskDone() == 0) {
+JNIEXPORT jint JNICALL
+Java_com_xiao_testlibz_NativeLib_httpsGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
+
+    auto *task = reinterpret_cast<WebTask *>(webTaskPtr);
+    task->DoGetString();
+    if (task->WaitTaskDone() == 0) {
         //请求服务器成功
-        string jsonResult = task.GetResultString();
+        string jsonResult = task->GetResultString();
         LOGI("httpsGet：%s\n", jsonResult.c_str());
         startParseHttpsGetResp(jsonResult);
-
-        return env->NewStringUTF(jsonResult.c_str());
+        return CURLIOE_OK;
     }
     LOGE("httpsGet ： 网络连接失败\n");
-    return env->NewStringUTF("网络连接失败！");
-
+    return CURL_SOCKOPT_ERROR;
 }
 
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_xiao_testlibz_NativeLib_cancelHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
+    auto *task = reinterpret_cast<WebTask *>(ptr);
+    if (task == nullptr) {
+        return -1;
+    }
+    // todo  需要 查看正常条件下 cancelRequest 的CURLcode是多少。
+    task->cancelRequest();
+    return 0;
+}

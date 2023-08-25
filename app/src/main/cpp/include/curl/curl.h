@@ -1229,7 +1229,7 @@ typedef enum {
   /* throw the header out too */
   CURLOPT(CURLOPT_HEADER, CURLOPTTYPE_LONG, 42),
 
-  /* shut off the progress meter */
+  /* shut off the progress meter 关闭进度条 */
   CURLOPT(CURLOPT_NOPROGRESS, CURLOPTTYPE_LONG, 43),
 
   /* use HEAD to get http document */
