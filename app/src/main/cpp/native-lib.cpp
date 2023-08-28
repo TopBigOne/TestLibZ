@@ -8,9 +8,24 @@
 using namespace std;
 
 
-#define JAVA_NATIVE_TASK_IMPL_PATH    "com/xiao/testlibz/NativeTaskImpl"
+#define JAVA_NATIVE_TASK_IMPL_PATH    "com/xiao/testlibz/task/NativeTaskImpl"
+#define JAVA_NATIVE_TASK_RESP_PATH    "com/xiao/testlibz/task/NativeResp"
+
+#define TASK_POINTER_NULL "the WebTask pointer is NULL"
+#define TASK_CONNECTION_SERVER_IN_FAILURE "connect the sever in failure"
+
+bool isDebugMode = false;
+
+typedef enum TaskStatus {
+    NATIVE_POINTER_NULL,
+    NATIVE_CONNECT_NET_FAILURE,
+
+} TaskStatus;
+
 
 void startNotifyApp(JNIEnv *pEnv, const string &basicString);
+
+jobject configResp(JNIEnv *pEnv, const int code, const string &basicString);
 
 /**
  * 通知
@@ -27,6 +42,29 @@ void startNotifyApp(JNIEnv *pEnv, int code, const string &basicString) {
                                                  "(ILjava/lang/String;)V");
     pEnv->CallVoidMethod(nativeTaskObject, notifyMethodId, code,
                          pEnv->NewStringUTF(basicString.c_str()));
+}
+
+/**
+ * for java.
+ * @param pEnv
+ * @param code
+ * @param basicString
+ * @return
+ */
+jobject configResp(JNIEnv *pEnv, const int code, const string &basicString) {
+    LOGI("configResp : ");
+    jclass nativeTaskClass = pEnv->FindClass(JAVA_NATIVE_TASK_RESP_PATH);
+    jobject respObject = pEnv->AllocObject(nativeTaskClass);
+    // setCode
+    jmethodID setCodeMethodId = pEnv->GetMethodID(nativeTaskClass, "setCode",
+                                                  "(I)V");
+    pEnv->CallVoidMethod(respObject, setCodeMethodId, code);
+    // setCode
+    jmethodID setResultMethodId = pEnv->GetMethodID(nativeTaskClass, "setResult",
+                                                    "(Ljava/lang/String;)V");
+    pEnv->CallVoidMethod(respObject, setResultMethodId, pEnv->NewStringUTF(basicString.c_str()));
+    return respObject;
+
 }
 
 
@@ -74,86 +112,65 @@ void startParseHttpsGetResp(string &respStr) {
 }
 
 
+
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_xiao_testlibz_NativeLib_initHttp(JNIEnv *env, jclass clazz, jstring url) {
+Java_com_xiao_testlibz_task_NativeLib_initHttp(JNIEnv *env, jclass clazz, jboolean is_debug,
+                                               jstring url) {
+
+    isDebugMode = is_debug;
     auto task = new WebTask();
     const char *tempUrl = env->GetStringUTFChars(url, JNI_FALSE);
     LOGI("initHttp ： tempUrl : %s", tempUrl);
     task->SetUrl(tempUrl);
     task->SetConnectTimeout(TIMEOUT_10);
     env->ReleaseStringUTFChars(url, tempUrl);
-    auto tempLong = reinterpret_cast<jlong>(task);
-    LOGI("initHttp ： tempLong : %ld", tempLong);
-    return tempLong;
-}
+    return reinterpret_cast<jlong>(task);
 
 
-extern "C"
-JNIEXPORT jint JNICALL
-Java_com_xiao_testlibz_NativeLib_httpPost(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
-    // todo...
-    startNotifyApp(env, CURL_SOCKOPT_ERROR, "post 还没有实现");;
-    return -1;
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_xiao_testlibz_NativeLib_httpsGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
+JNIEXPORT jobject JNICALL
+Java_com_xiao_testlibz_task_NativeLib_httpsGet(JNIEnv *env, jclass clazz, jlong webTaskPtr) {
     auto *task = reinterpret_cast<WebTask *>(webTaskPtr);
+    if (task == nullptr) {
+        return configResp(env, NATIVE_POINTER_NULL, TASK_POINTER_NULL);
+    }
     task->DoGetString();
     if (task->WaitTaskDone() == 0) {
-        //请求服务器成功
+        // 请求服务器成功
         string jsonResult = task->GetResultString();
-        startNotifyApp(env, CURLE_OK, jsonResult);
         LOGI("httpsGet：%s\n", jsonResult.c_str());
         startParseHttpsGetResp(jsonResult);
-        return CURLIOE_OK;
+        return configResp(env, CURLE_OK, jsonResult);
     }
     LOGE("httpsGet ： 网络连接失败\n");
-    startNotifyApp(env, CURL_SOCKOPT_ERROR, "网络连接失败");
-    return CURL_SOCKOPT_ERROR;
-}
-
-
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_com_xiao_testlibz_NativeLib_cancelHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
-    auto *task = reinterpret_cast<WebTask *>(ptr);
-    if (task == nullptr) {
-        return -1;
-    }
-    // todo  需要 查看正常条件下 cancelRequest 的CURLcode是多少。
-    task->cancelRequest();
-    delete task;
-    task = nullptr;
-    return 0;
+    return configResp(env, NATIVE_POINTER_NULL, TASK_CONNECTION_SERVER_IN_FAILURE);
 }
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_xiao_testlibz_NativeLib_httpGet(JNIEnv *env, jclass clazz, jstring url) {
-    //GET请求
-    const char *tempUrl = env->GetStringUTFChars(url, JNI_FALSE);
-    WebTask task;
-    task.SetUrl(tempUrl);
-    task.SetConnectTimeout(10);
-    task.DoGetString();
-    if (task.WaitTaskDone() == 0) {
-        //请求服务器成功
-        string jsonResult = task.GetResultString();
-        LOGI("httpGet ：%s\n", jsonResult.c_str());
-        startParseHttpGetResp(jsonResult);
-        return env->NewStringUTF(jsonResult.c_str());
-    }
-    LOGE("httpGet ： 网络连接失败\n");
-    return env->NewStringUTF("网络连接失败！");
+JNIEXPORT jobject JNICALL
+Java_com_xiao_testlibz_task_NativeLib_httpsPost(JNIEnv *env, jclass clazz, jlong ptr) {
+    return configResp(env, NATIVE_POINTER_NULL, TASK_CONNECTION_SERVER_IN_FAILURE);
 
 }
 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xiao_testlibz_NativeLib_releaseHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
+Java_com_xiao_testlibz_task_NativeLib_cancelHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
+    auto *task = reinterpret_cast<WebTask *>(ptr);
+    if (task == nullptr) {
+        return ;
+    }
+    // todo  需要 查看正常条件下 cancelRequest 的CURLcode是多少。
+    task->cancelRequest();
+    delete task;
+    task = nullptr;
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xiao_testlibz_task_NativeLib_releaseHttpRequest(JNIEnv *env, jclass clazz, jlong ptr) {
     auto *webTask = reinterpret_cast<WebTask *>(ptr);
     if (webTask) {
         delete webTask;

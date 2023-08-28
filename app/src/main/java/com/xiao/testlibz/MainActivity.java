@@ -6,21 +6,26 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xiao.testlibz.databinding.ActivityMainBinding;
+import com.xiao.testlibz.task.NativeLib;
+import com.xiao.testlibz.task.NativeResp;
+import com.xiao.testlibz.task.NativeTask;
+import com.xiao.testlibz.task.NativeTaskImpl;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private Button mBtnHttpsGet;
-    private Button mBtnHttpsGetTwo;
-    private Button mBtnPost;
-    private TextView mTvResp;
+    private Button              mBtnHttpsGet;
+    private Button              mBtnHttpsGetTwo;
+    private Button              mBtnPost;
+    private TextView            mTvResp;
 
 
-    private static final String TAG = "MainActivity_ : ";
-    public static final String HTTP_GET_URL = "http://jsonplaceholder.typicode.com/posts";
-    public static final String HTTPS_GET_URL = "https://api.thecatapi.com/v1/images/search?limit=1";
+    private static final String TAG           = "MainActivity_ : ";
+    public static final  String HTTP_GET_URL  = "http://jsonplaceholder.typicode.com/posts";
+    public static final  String HTTPS_GET_URL = "https://api.thecatapi.com/v1/images/search?limit=1";
 
     private NativeTaskImpl nativeTask;
 
@@ -44,36 +49,38 @@ public class MainActivity extends AppCompatActivity {
         mBtnHttpsGetTwo = binding.btnRequestHttpsGetTwo;
     }
 
+    NativeResp nativeResp;
+
     private void initEvent() {
         mBtnPost.setOnClickListener(v -> {
             //updateContent(NativeLib.nativeHttpPost());
         });
 
         mBtnHttpsGet.setOnClickListener(v -> {
-            nativeTask.startTask(HTTPS_GET_URL);
+            nativeResp = nativeTask.startTask(HTTPS_GET_URL);
+            updateContent(nativeResp);
 
         });
         mBtnHttpsGetTwo.setOnClickListener(v -> {
-            updateContent(NativeLib.httpGet(HTTP_GET_URL));
+            nativeResp = nativeTask.startTask(HTTP_GET_URL);
+            updateContent(nativeResp);
+
         });
 
-        nativeTask.setNativeRequestListener(new NativeRequestListener() {
-            @Override
-            public void onSuccess(String msg) {
-                Log.d(TAG, "nativeTask onSuccess: msg   :" + msg);
-                updateContent(msg);
-            }
 
-            @Override
-            public void onFailure(int code, String errMsg) {
-                Log.d(TAG, "nativeTask onSuccess: errMsg :" + errMsg);
-                updateContent(errMsg);
-            }
-        });
     }
 
-    private void updateContent(String content) {
-        mTvResp.setText(content);
+    private void updateContent(NativeResp nativeResp) {
+        if (nativeResp == null) {
+            Toast.makeText(this, "nativeResp is Null.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int    code   = nativeResp.getCode();
+        String result = nativeResp.getResult();
+        Log.d(TAG, "updateContent: code   : " + code);
+        Log.d(TAG, "updateContent: result : " + result);
+
+        mTvResp.setText(result);
     }
 
 }
