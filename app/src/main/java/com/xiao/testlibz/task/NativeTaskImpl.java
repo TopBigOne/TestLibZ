@@ -7,6 +7,11 @@ import android.widget.Toast;
 
 import com.xiao.testlibz.NetworkApp;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Map;
+
 public final class NativeTaskImpl extends NativeTask {
 
 
@@ -28,14 +33,14 @@ public final class NativeTaskImpl extends NativeTask {
      * @param url
      * @return init status.
      */
-    public int init(String url) {
+    public int init(String url, String parameters) {
         Log.i(TAG, "init: step 1:");
         if (TextUtils.isEmpty(url)) {
             return TaskStatus.NULL_URL;
         }
 
         if (url.startsWith("http") || url.startsWith("https")) {
-            taskPtr = NativeLib.nativeInitHttp(url);
+            taskPtr = NativeLib.nativeInitHttp(url, parameters);
             if (taskPtr > 0) {
                 Log.d(TAG, "init  success: ");
                 return TaskStatus.INIT_SUCCESS;
@@ -44,7 +49,6 @@ public final class NativeTaskImpl extends NativeTask {
         }
         return TaskStatus.ILLEGAL_HOST;
     }
-
 
 
     public NativeResp realStartTask() {
@@ -64,6 +68,29 @@ public final class NativeTaskImpl extends NativeTask {
     }
 
 
+    public String generateParameters(Map<String, Object> parameters) {
+        JSONObject jsonObject = new JSONObject();
+        if (parameters == null) {
+            return "";
+        }
+        for (Map.Entry<String, Object> parameterObject : parameters.entrySet()) {
+            String tempKey   = parameterObject.getKey();
+            Object tempValue = parameterObject.getValue();
+            if (TextUtils.isEmpty(tempKey)) {
+                continue;
+            }
+            try {
+                jsonObject.put(tempKey, tempValue);
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+        return jsonObject.toString();
+    }
+
+
     public void releaseNativeTaskPtr() {
 
         Log.i(TAG, "releaseNativeTaskPtr: step 3:");
@@ -71,11 +98,6 @@ public final class NativeTaskImpl extends NativeTask {
             NativeLib.nativeReleaseHttpRequest(taskPtr);
         }
     }
-
-
-
-
-
 
 
 }

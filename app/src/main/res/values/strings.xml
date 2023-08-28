@@ -6,5 +6,6 @@
     <string name="https_get_to_view">https get to view</string>
     <string name="http_get">http get</string>
     <string name="https_post">https post</string>
+    <string name="https_post_without_parameters">https post without parameters</string>
     <string name="network_resp">network resp</string>
 </resources>

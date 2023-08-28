@@ -90,6 +90,7 @@ void WebTask::_init() {
 
     curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
+    // 是用于配置 libcurl 使用指定的 CA 证书文件的选项
     curl_easy_setopt(m_curl, CURLOPT_CAINFO, "/tmp/ca.pem");
 
     curl_easy_setopt(m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 60 * 60 * 72);
@@ -131,8 +132,9 @@ void WebTask::AddPostPicture(const char *item_name, const char *file_path, const
 }
 
 int WebTask::DoGetString() {
-    if (m_formpost)
+    if (m_formpost) {
         curl_easy_setopt(m_curl, CURLOPT_HTTPPOST, m_formpost);
+    }
 
     /* send all data to this function  */
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, web_write_mem);
@@ -174,11 +176,14 @@ int WebTask::WaitTaskDone() {
 }
 
 int WebTask::DoGetFile(const char *range) {
-    if (m_formpost)
+    if (m_formpost){
         curl_easy_setopt(m_curl, CURLOPT_HTTPPOST, m_formpost);
+    }
 
-    if (range)
+
+    if (range){
         curl_easy_setopt(m_curl, CURLOPT_RANGE, range);
+    }
 
 
     char fpath[128];
@@ -262,7 +267,7 @@ void WebTask::SetConnectTimeout(int timeo) {
     curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, timeo);
 }
 
-CURLcode WebTask::cancelRequest() const {
+CURLcode WebTask::CancelRequest() const {
     return curl_easy_pause(m_curl, CURLPAUSE_ALL);
 }
 

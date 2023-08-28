@@ -53,7 +53,7 @@ public:
     /**
      * 中断网络请求
      */
-    CURLcode cancelRequest() const;
+    CURLcode CancelRequest() const;
 
 
 private:
