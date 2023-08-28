@@ -60,7 +60,6 @@ public final class NativeTaskImpl extends NativeTask {
             return nativeResp;
 
         }
-        Log.d(TAG, "realStartTask: ...");
         if (taskType == TaskType.GET) {
             return NativeLib.nativeHttpsGet(taskPtr);
         }
@@ -92,7 +91,6 @@ public final class NativeTaskImpl extends NativeTask {
 
 
     public void releaseNativeTaskPtr() {
-
         Log.i(TAG, "releaseNativeTaskPtr: step 3:");
         if (taskPtr > 0) {
             NativeLib.nativeReleaseHttpRequest(taskPtr);
