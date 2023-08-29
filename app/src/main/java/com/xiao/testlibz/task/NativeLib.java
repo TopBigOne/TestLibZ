@@ -18,10 +18,9 @@ public final class NativeLib {
 
     private static native void releaseHttpRequest(long ptr);
 
-    private static native NativeResp httpsGet(long ptr);
+    private static native RequestResp httpsGet(long ptr);
 
-    private static native NativeResp httpsPost(long ptr);
-
+    private static native RequestResp httpsPost(long ptr);
 
     public static long nativeInitHttp(String url, String parameters) {
         return initHttp(BuildConfig.DEBUG, url, parameters);
@@ -32,7 +31,7 @@ public final class NativeLib {
      *
      * @return
      */
-    public static NativeResp nativeHttpsGet(long taskPtr) {
+    public static RequestResp nativeHttpsGet(long taskPtr) {
         return httpsGet(taskPtr);
     }
 
@@ -41,7 +40,7 @@ public final class NativeLib {
      *
      * @return
      */
-    public static NativeResp nativeHttpsPost(long taskPtr) {
+    public static RequestResp nativeHttpsPost(long taskPtr) {
         return httpsPost(taskPtr);
     }
 

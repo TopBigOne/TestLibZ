@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define JAVA_NATIVE_TASK_RESP_PATH    "com/xiao/testlibz/task/NativeResp"
+#define JAVA_NATIVE_TASK_RESP_PATH    "com/xiao/testlibz/task/RequestResp"
 
 #define TASK_POINTER_NULL "the WebTask pointer is NULL"
 #define TASK_CONNECTION_SERVER_IN_FAILURE "connect the sever in failure"

@@ -1,36 +1,36 @@
 package com.xiao.testlibz.task;
 
-import android.text.TextUtils;
 import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Map;
 
 
-public abstract class NativeTask {
+public abstract class AbstractNativeTask {
     public static final String TAG = "NativeTask : ";
 
     protected TaskType taskType = TaskType.GET;
     public    long     taskPtr  = 0;
+
+    public static final String NATIVE_TASK_RESULT_CODE = "native_task_result_code";
+    public static final String NATIVE_TASK_RESULT_STR = "native_task_result_str";
+    public static final String NATIVE_TASK_URL = "native_task_url";
 
     enum TaskType {
         GET, POST,
     }
 
     public static class TaskStatus {
-        public static final int NULL_URL            = 0;
-        public static final int ILLEGAL_HOST        = 1;
-        public static final int INIT_SUCCESS        = 2;
-        public static final int INIT_FAILURE        = 4;
-        public static final int NativePointerNULL   = 3;
-        public static final int NATIVE_TASK_SUCCESS = 5;
+        public static final int NULL_URL          = 0;
+        public static final int ILLEGAL_HOST      = 1;
+        public static final int INIT_SUCCESS      = 2;
+        public static final int INIT_FAILURE      = 4;
+        public static final int NativePointerNULL = 3;
+        public static final int NETWORK_FAILURE   = 6;
     }
 
     public abstract int init(String url, String parameters);
 
-    public abstract NativeResp realStartTask();
+    public abstract RequestResp realStartTask();
 
     public abstract void releaseNativeTaskPtr();
 
@@ -43,7 +43,7 @@ public abstract class NativeTask {
      * @param url
      * @return
      */
-    public NativeResp startTask(String url) {
+    public RequestResp startTask(String url) {
         return startTask(url, null);
     }
 
@@ -55,23 +55,22 @@ public abstract class NativeTask {
      * @param parameters
      * @return
      */
-    public NativeResp startTask(String url, Map<String, Object> parameters) {
+    public RequestResp startTask(String url, Map<String, Object> parameters) {
+        Log.d(TAG, "startTask: thread is " + Thread.currentThread().getName());
         // step 1:
         if (init(url, generateParameters(parameters)) != TaskStatus.INIT_SUCCESS) {
             Log.d(TAG, "startTask step is in failure");
-            NativeResp resp = new NativeResp();
+            RequestResp resp = new RequestResp();
             resp.setCode(TaskStatus.INIT_FAILURE);
             return resp;
         }
         this.taskType = parameters == null ? TaskType.GET : TaskType.POST;
         // step 2:
-        NativeResp nativeResp = realStartTask();
+        RequestResp nativeResp = realStartTask();
         // step 3
-        releaseNativeTaskPtr();
+        // releaseNativeTaskPtr();
         return nativeResp;
     }
-
-
 
 
     public long cancelRequest() {

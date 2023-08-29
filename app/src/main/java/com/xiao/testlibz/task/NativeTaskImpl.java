@@ -3,29 +3,13 @@ package com.xiao.testlibz.task;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.xiao.testlibz.NetworkApp;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
 
-public final class NativeTaskImpl extends NativeTask {
-
-
-    /**
-     * @param code 失败时，code 是native 传递来的；
-     * @param msg  成功和失败公用，json or error msg.
-     */
-    public void nativeNotify(int code, String msg) {
-        Log.i(TAG, "nativeNotify: msg : " + msg);
-        Toast.makeText(NetworkApp.getInstance(), msg, Toast.LENGTH_SHORT).show();
-
-        releaseNativeTaskPtr();
-    }
-
+public final class NativeTaskImpl extends AbstractNativeTask {
 
     /**
      * step 1:
@@ -51,11 +35,11 @@ public final class NativeTaskImpl extends NativeTask {
     }
 
 
-    public NativeResp realStartTask() {
+    public RequestResp realStartTask() {
         Log.i(TAG, "realStartTask: step 2:");
         if (taskPtr <= 0) {
             Log.e(TAG, "realStartTask the taskPtr is less than 0.");
-            NativeResp nativeResp = new NativeResp();
+            RequestResp nativeResp = new RequestResp();
             nativeResp.setCode(TaskStatus.NativePointerNULL);
             return nativeResp;
 

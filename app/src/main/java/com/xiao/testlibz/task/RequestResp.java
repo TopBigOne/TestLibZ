@@ -1,7 +1,9 @@
 package com.xiao.testlibz.task;
 
-public final class NativeResp {
-    private int code;
+public  class RequestResp {
+    // 0： 成功，其他值，失败
+    private int    code = -1;
+    // 成功时：正常数据，失败时：错误日志
     private String result;
 
     public int getCode() {
@@ -27,4 +29,6 @@ public final class NativeResp {
                 ", result='" + result + '\'' +
                 '}';
     }
+
+
 }
