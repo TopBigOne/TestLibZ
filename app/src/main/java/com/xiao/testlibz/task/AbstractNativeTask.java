@@ -12,8 +12,8 @@ public abstract class AbstractNativeTask {
     public    long     taskPtr  = 0;
 
     public static final String NATIVE_TASK_RESULT_CODE = "native_task_result_code";
-    public static final String NATIVE_TASK_RESULT_STR = "native_task_result_str";
-    public static final String NATIVE_TASK_URL = "native_task_url";
+    public static final String NATIVE_TASK_RESULT_STR  = "native_task_result_str";
+    public static final String NATIVE_TASK_URL         = "native_task_url";
 
     enum TaskType {
         GET, POST,
@@ -68,7 +68,7 @@ public abstract class AbstractNativeTask {
         // step 2:
         RequestResp nativeResp = realStartTask();
         // step 3
-        // releaseNativeTaskPtr();
+        releaseNativeTaskPtr();
         return nativeResp;
     }
 
